@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "ShopEzy Mobile",
+    "slug": "shopezy-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "shopezy",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#2874f0"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.shopezy.ecommerce"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#2874f0"
+      },
+      "package": "com.shopezy.ecommerce"
+    },
+    "web": {
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store"
+    ]
+  }
+}

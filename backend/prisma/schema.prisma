@@ -1,0 +1,784 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  CUSTOMER
+  SELLER
+  ADMIN
+}
+
+enum AdminSubRole {
+  SUPER_ADMIN
+  MANAGER
+  SUPPORT_AGENT
+  FINANCE
+}
+
+enum PincodeZone {
+  METRO
+  TIER_1
+  TIER_2_3
+  REMOTE
+}
+
+enum BannerPosition {
+  HERO_CAROUSEL
+  MID_PROMO
+}
+
+enum SellerApprovalStatus {
+  PENDING
+  APPROVED
+  SUSPENDED
+}
+
+enum PayoutMethodType {
+  BANK_TRANSFER
+  UPI
+}
+
+enum WalletTransactionType {
+  CREDIT_ORDER_EARNING
+  DEBIT_REFUND_REVERSAL
+  DEBIT_PAYOUT_HOLD
+  CREDIT_PAYOUT_REJECTED_RESTORE
+  DEBIT_PAYOUT_SETTLED
+}
+
+enum PayoutRequestStatus {
+  PENDING
+  APPROVED_PROCESSING
+  SETTLED
+  REJECTED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FLAT_AMOUNT
+}
+
+enum PaymentMethod {
+  RAZORPAY
+  COD
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum OrderItemStatus {
+  PROCESSING
+  PACKED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+  RETURN_REQUESTED
+  RETURN_APPROVED
+  RETURNED
+  REFUNDED
+}
+
+enum ReturnRequestType {
+  CANCELLATION
+  RETURN
+}
+
+enum ReturnRequestStatus {
+  REQUESTED
+  APPROVED
+  REJECTED
+  REFUND_INITIATED
+  REFUNDED
+}
+
+enum RefundTransactionStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TicketStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+  CLOSED
+}
+
+enum NotificationChannel {
+  EMAIL
+  PUSH
+}
+
+// -------------------------------------------------------------
+// 1. Users, RBAC & Audit
+// -------------------------------------------------------------
+
+model User {
+  id                 String          @id @default(uuid())
+  name               String
+  email              String          @unique
+  password_hash      String
+  role               Role            @default(CUSTOMER)
+  admin_sub_role     AdminSubRole?
+  phone              String?
+  address            String?
+  preferred_language String          @default("en")
+  is_active          Boolean         @default(true)
+  created_at         DateTime        @default(now())
+
+  seller_profile     SellerProfile?
+  orders             Order[]
+  reviews            ProductReview[]
+  questions          ProductQuestion[]
+  wishlist           WishlistItem[]
+  recently_viewed    RecentlyViewedItem[]
+  support_tickets    SupportTicket[]
+  device_push_tokens DevicePushToken[]
+  audit_logs         AuditLog[]
+  cart               Cart?
+  tax_invoices       TaxInvoice[]
+
+  @@index([role, admin_sub_role])
+  @@index([email])
+}
+
+model AuditLog {
+  id             String        @id @default(uuid())
+  actor_id       String?
+  actor_email    String
+  actor_role     Role
+  actor_sub_role AdminSubRole?
+  action         String
+  target_type    String
+  target_id      String
+  summary        String
+  metadata_diff  Json?
+  ip_address     String?
+  user_agent     String?
+  created_at     DateTime      @default(now())
+
+  actor          User?         @relation(fields: [actor_id], references: [id], onDelete: SetNull)
+
+  @@index([target_type, target_id])
+  @@index([actor_id, created_at])
+  @@index([created_at])
+}
+
+model DevicePushToken {
+  id              String   @id @default(uuid())
+  user_id         String
+  expo_push_token String   @unique
+  device_platform String
+  is_active       Boolean  @default(true)
+  updated_at      DateTime @updatedAt
+
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, is_active])
+}
+
+// -------------------------------------------------------------
+// 2. Central Admin CMS & Global Config
+// -------------------------------------------------------------
+
+model SiteConfig {
+  id                         String   @id @default("default")
+  site_name                  String   @default("ShopEzy / Flipkart Marketplace")
+  logo_url                   String   @default("")
+  primary_color              String   @default("#2874f0")
+  announcement_bar_text      String   @default("Mega Sale is Live! Free Shipping on orders above Rs. 499.")
+  announcement_bar_hi        String   @default("महा सेल शुरू! ₹499 से अधिक के ऑर्डर पर मुफ्त डिलीवरी।")
+  announcement_bar_bn        String   @default("মেগা সেল লাইভ! ₹৪৯৯ এর বেশি অর্ডারে ফ্রি ডেলিভারি।")
+  global_commission_percent  Float    @default(10.0)
+  shipping_fee               Float    @default(40.0)
+  free_shipping_threshold    Float    @default(499.0)
+  cod_enabled                Boolean  @default(true)
+  razorpay_enabled           Boolean  @default(true)
+  maintenance_mode           Boolean  @default(false)
+  return_window_days         Int      @default(7)
+  min_payout_amount          Float    @default(500.0)
+  payout_tds_percent         Float    @default(1.0)
+  allow_unlisted_pincodes    Boolean  @default(true)
+  default_delivery_days      Int      @default(5)
+  platform_legal_name        String   @default("ShopEzy Multi-Vendor Pvt. Ltd.")
+  platform_gstin             String   @default("19AAACS1234F1Z5")
+  invoice_footer_note        String   @default("This is a computer-generated tax invoice and requires no physical signature.")
+  email_notifications_enabled Boolean @default(true)
+  push_notifications_enabled  Boolean @default(true)
+  support_email              String   @default("support@shopezy.com")
+  default_language           String   @default("en")
+  enabled_languages          String[] @default(["en", "hi", "bn"])
+  meta_title                 String   @default("ShopEzy - India's Trusted Online Shopping Platform")
+  meta_description           String   @default("Shop top electronics, fashion, mobile phones, lifestyle and more with fast delivery across India.")
+  meta_keywords              String   @default("ecommerce, shopping, flipkart clone, online store, deals, discounts")
+  default_og_image_url       String   @default("https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1200")
+  canonical_base_url         String   @default("https://shopezy.com")
+}
+
+model Banner {
+  id            String         @id @default(uuid())
+  title         String
+  title_hi      String?        @default("")
+  title_bn      String?        @default("")
+  subtitle      String?        @default("")
+  subtitle_hi   String?        @default("")
+  subtitle_bn   String?        @default("")
+  image_url     String
+  redirect_link String
+  position      BannerPosition @default(HERO_CAROUSEL)
+  display_order Int            @default(0)
+  is_active     Boolean        @default(true)
+
+  @@index([position, is_active, display_order])
+}
+
+model Category {
+  id                String    @id @default(uuid())
+  name              String
+  name_hi           String?   @default("")
+  name_bn           String?   @default("")
+  slug              String    @unique
+  icon_or_image_url String
+  is_featured       Boolean   @default(true)
+  display_order     Int       @default(0)
+
+  products          Product[]
+
+  @@index([slug])
+  @@index([is_featured, display_order])
+}
+
+model ServiceablePincode {
+  id                 String      @id @default(uuid())
+  pincode            String      @unique
+  city               String
+  state              String
+  zone               PincodeZone @default(TIER_2_3)
+  estimated_days     Int         @default(4)
+  cod_available      Boolean     @default(true)
+  extra_shipping_fee Float       @default(0.0)
+  is_serviceable     Boolean     @default(true)
+
+  @@index([pincode])
+  @@index([state, city])
+}
+
+// -------------------------------------------------------------
+// 3. Multi-Vendor Sellers & Wallet Ledger
+// -------------------------------------------------------------
+
+model SellerProfile {
+  id                        String               @id @default(uuid())
+  user_id                   String               @unique
+  store_name                String
+  gstin_or_tax_id           String
+  registered_state          String
+  registered_address        String
+  pickup_pincode            String
+  handling_days             Int                  @default(1)
+  approval_status           SellerApprovalStatus @default(PENDING)
+  commission_rate           Float?
+  pending_clearance_balance Float                @default(0.0)
+  available_balance         Float                @default(0.0)
+  on_hold_payout_balance    Float                @default(0.0)
+  total_withdrawn           Float                @default(0.0)
+  created_at                DateTime             @default(now())
+
+  user                      User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  payout_methods            SellerPayoutMethod[]
+  wallet_transactions       WalletTransaction[]
+  payout_requests           PayoutRequest[]
+  products                  Product[]
+  order_items               OrderItem[]
+  tax_invoices              TaxInvoice[]
+  return_requests           ReturnRequest[]
+
+  @@index([approval_status])
+  @@index([store_name])
+}
+
+model SellerPayoutMethod {
+  id                    String           @id @default(uuid())
+  seller_id             String
+  method_type           PayoutMethodType @default(BANK_TRANSFER)
+  account_holder_name   String
+  bank_name             String?          @default("")
+  account_number_masked String
+  account_number_full   String
+  ifsc_code             String?          @default("")
+  upi_id                String?          @default("")
+  is_primary            Boolean          @default(false)
+
+  seller                SellerProfile    @relation(fields: [seller_id], references: [id], onDelete: Cascade)
+  payout_requests       PayoutRequest[]
+
+  @@index([seller_id, is_primary])
+}
+
+model WalletTransaction {
+  id                String                @id @default(uuid())
+  seller_id         String
+  order_item_id     String?
+  payout_request_id String?
+  type              WalletTransactionType
+  amount            Float
+  balance_after     Float
+  description       String
+  created_at        DateTime              @default(now())
+
+  seller            SellerProfile         @relation(fields: [seller_id], references: [id], onDelete: Cascade)
+
+  @@index([seller_id, created_at])
+  @@index([order_item_id])
+  @@index([payout_request_id])
+}
+
+model PayoutRequest {
+  id                  String              @id @default(uuid())
+  seller_id           String
+  payout_method_id    String
+  amount_requested    Float
+  tds_or_fee_deducted Float               @default(0.0)
+  net_payable_amount  Float
+  status              PayoutRequestStatus @default(PENDING)
+  utr_reference_number String?
+  admin_note          String?
+  requested_at        DateTime            @default(now())
+  settled_at          DateTime?
+
+  seller              SellerProfile       @relation(fields: [seller_id], references: [id], onDelete: Cascade)
+  payout_method       SellerPayoutMethod  @relation(fields: [payout_method_id], references: [id])
+
+  @@index([seller_id, status])
+  @@index([status, requested_at])
+}
+
+// -------------------------------------------------------------
+// 4. Catalog, Multi-Attribute Variants, Reviews, Q&A & Discovery
+// -------------------------------------------------------------
+
+model Product {
+  id               String               @id @default(uuid())
+  seller_id        String
+  category_id      String
+  title            String
+  slug             String               @unique
+  description      String
+  price            Float
+  discount_price   Float
+  stock_quantity   Int                  @default(0)
+  images           String[]
+  specifications   Json                 @default("{}")
+  has_variants     Boolean              @default(false)
+  variant_options  Json                 @default("[]")
+  hsn_code         String               @default("8517")
+  gst_rate_percent Float                @default(18.0)
+  is_featured      Boolean              @default(false)
+  is_active        Boolean              @default(true)
+  rating           Float                @default(0.0)
+  review_count     Int                  @default(0)
+  meta_title       String?              @default("")
+  meta_description String?              @default("")
+  created_at       DateTime             @default(now())
+
+  seller           SellerProfile        @relation(fields: [seller_id], references: [id], onDelete: Cascade)
+  category         Category             @relation(fields: [category_id], references: [id])
+  variants         ProductVariant[]
+  reviews          ProductReview[]
+  questions        ProductQuestion[]
+  flash_sale_items FlashSaleItem[]
+  cart_items       CartItem[]
+  order_items      OrderItem[]
+  wishlist_items   WishlistItem[]
+  recently_viewed  RecentlyViewedItem[]
+
+  @@index([category_id, is_active])
+  @@index([seller_id, is_active])
+  @@index([price, rating])
+  @@index([slug])
+  @@index([is_featured, is_active])
+}
+
+model ProductVariant {
+  id               String          @id @default(uuid())
+  product_id       String
+  sku              String          @unique
+  attributes       Json
+  price            Float
+  discount_price   Float
+  stock_quantity   Int             @default(0)
+  image_url        String?         @default("")
+  is_active        Boolean         @default(true)
+
+  product          Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  flash_sale_items FlashSaleItem[]
+  cart_items       CartItem[]
+  order_items      OrderItem[]
+
+  @@index([product_id, is_active])
+  @@index([sku])
+}
+
+model ProductReview {
+  id                   String      @id @default(uuid())
+  product_id           String
+  user_id              String
+  order_item_id        String      @unique
+  rating               Int
+  title                String
+  comment              String
+  images               String[]
+  is_verified_purchase Boolean     @default(true)
+  helpful_count        Int         @default(0)
+  is_approved          Boolean     @default(true)
+  created_at           DateTime    @default(now())
+
+  product              Product     @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  user                 User        @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  order_item           OrderItem   @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id, is_approved, rating])
+  @@index([user_id])
+}
+
+model ProductQuestion {
+  id                String    @id @default(uuid())
+  product_id        String
+  user_id           String
+  question_text     String
+  answer_text       String?
+  answered_by_id    String?
+  answered_by_role  String?
+  helpful_count     Int       @default(0)
+  is_visible        Boolean   @default(true)
+  created_at        DateTime  @default(now())
+  answered_at       DateTime?
+
+  product           Product   @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  user              User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([product_id, is_visible])
+}
+
+model WishlistItem {
+  id         String   @id @default(uuid())
+  user_id    String
+  product_id String
+  created_at DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@index([user_id])
+}
+
+model RecentlyViewedItem {
+  id         String   @id @default(uuid())
+  user_id    String
+  product_id String
+  viewed_at  DateTime @default(now())
+
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [product_id], references: [id], onDelete: Cascade)
+
+  @@unique([user_id, product_id])
+  @@index([user_id, viewed_at])
+}
+
+model SearchQueryLog {
+  id               String   @id @default(uuid())
+  query_normalized String   @unique
+  search_count     Int      @default(1)
+  updated_at       DateTime @updatedAt
+
+  @@index([search_count])
+}
+
+// -------------------------------------------------------------
+// 5. Promotions (Coupons & Flash Sales)
+// -------------------------------------------------------------
+
+model Coupon {
+  id                 String       @id @default(uuid())
+  code               String       @unique
+  description        String
+  discount_type      DiscountType @default(PERCENTAGE)
+  discount_value     Float
+  max_discount_cap   Float?
+  min_order_amount   Float        @default(0.0)
+  usage_limit        Int?
+  used_count         Int          @default(0)
+  per_user_limit     Int          @default(1)
+  valid_from         DateTime     @default(now())
+  valid_until        DateTime
+  is_active          Boolean      @default(true)
+
+  @@index([code, is_active])
+}
+
+model FlashSale {
+  id           String          @id @default(uuid())
+  title        String
+  banner_color String          @default("#e11d48")
+  starts_at    DateTime
+  ends_at      DateTime
+  is_active    Boolean         @default(true)
+
+  items        FlashSaleItem[]
+
+  @@index([is_active, starts_at, ends_at])
+}
+
+model FlashSaleItem {
+  id                String          @id @default(uuid())
+  flash_sale_id     String
+  product_id        String
+  variant_id        String?
+  flash_price       Float
+  flash_stock_limit Int
+  sold_count        Int             @default(0)
+
+  flash_sale        FlashSale       @relation(fields: [flash_sale_id], references: [id], onDelete: Cascade)
+  product           Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  variant           ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: SetNull)
+
+  @@index([flash_sale_id])
+  @@index([product_id])
+}
+
+// -------------------------------------------------------------
+// 6. Cart, Orders, Tracking, Returns, Refunds & GST Invoices
+// -------------------------------------------------------------
+
+model Cart {
+  id         String     @id @default(uuid())
+  user_id    String     @unique
+  updated_at DateTime   @updatedAt
+
+  user       User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items      CartItem[]
+}
+
+model CartItem {
+  id         String          @id @default(uuid())
+  cart_id    String
+  product_id String
+  variant_id String?
+  quantity   Int             @default(1)
+
+  cart       Cart            @relation(fields: [cart_id], references: [id], onDelete: Cascade)
+  product    Product         @relation(fields: [product_id], references: [id], onDelete: Cascade)
+  variant    ProductVariant? @relation(fields: [variant_id], references: [id], onDelete: SetNull)
+
+  @@index([cart_id])
+}
+
+model Order {
+  id                     String               @id @default(uuid())
+  user_id                String
+  total_amount           Float
+  shipping_fee           Float                @default(0.0)
+  coupon_code            String?
+  coupon_discount_amount Float                @default(0.0)
+  payment_method         PaymentMethod        @default(COD)
+  payment_status         PaymentStatus        @default(PENDING)
+  razorpay_order_id      String?
+  razorpay_payment_id    String?
+  razorpay_signature     String?
+  shipping_address       Json
+  created_at             DateTime             @default(now())
+
+  user                   User                 @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  items                  OrderItem[]
+  tax_invoices           TaxInvoice[]
+  refund_transactions    RefundTransaction[]
+
+  @@index([user_id, created_at])
+  @@index([payment_status])
+  @@index([razorpay_order_id])
+}
+
+model OrderItem {
+  id                         String                  @id @default(uuid())
+  order_id                   String
+  product_id                 String
+  variant_id                 String?
+  variant_snapshot           Json                    @default("{}")
+  seller_id                  String
+  quantity                   Int                     @default(1)
+  price_at_purchase          Float
+  platform_commission_amount Float                   @default(0.0)
+  seller_net_earning         Float                   @default(0.0)
+  item_status                OrderItemStatus         @default(PROCESSING)
+  courier_name               String?
+  awb_tracking_number        String?
+  tracking_url               String?
+  estimated_delivery_date    DateTime?
+  delivered_at               DateTime?
+
+  order                      Order                   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  product                    Product                 @relation(fields: [product_id], references: [id], onDelete: Restrict)
+  variant                    ProductVariant?         @relation(fields: [variant_id], references: [id], onDelete: SetNull)
+  seller                     SellerProfile           @relation(fields: [seller_id], references: [id], onDelete: Restrict)
+  tracking_events            ShipmentTrackingEvent[]
+  return_request             ReturnRequest?
+  tax_invoice                TaxInvoice?
+  review                     ProductReview?
+
+  @@index([order_id])
+  @@index([seller_id, item_status])
+}
+
+model ShipmentTrackingEvent {
+  id            String    @id @default(uuid())
+  order_item_id String
+  status_title  String
+  location      String
+  remarks       String
+  event_time    DateTime  @default(now())
+
+  order_item    OrderItem @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+
+  @@index([order_item_id, event_time])
+}
+
+model ReturnRequest {
+  id                 String              @id @default(uuid())
+  order_item_id      String              @unique
+  user_id            String
+  seller_id          String
+  request_type       ReturnRequestType   @default(RETURN)
+  reason             String
+  comments           String
+  proof_images       String[]
+  status             ReturnRequestStatus @default(REQUESTED)
+  seller_note        String?
+  refund_amount      Float
+  restock_inventory  Boolean             @default(true)
+  created_at         DateTime            @default(now())
+
+  order_item         OrderItem           @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+  seller             SellerProfile       @relation(fields: [seller_id], references: [id], onDelete: Restrict)
+  refund_transaction RefundTransaction?
+
+  @@index([seller_id, status])
+  @@index([user_id])
+}
+
+model RefundTransaction {
+  id                  String                  @id @default(uuid())
+  order_id            String
+  return_request_id   String                  @unique
+  payment_method      PaymentMethod
+  razorpay_payment_id String?
+  razorpay_refund_id  String?
+  amount_in_inr       Float
+  status              RefundTransactionStatus @default(PENDING)
+  processed_at        DateTime                @default(now())
+
+  order               Order                   @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  return_request      ReturnRequest           @relation(fields: [return_request_id], references: [id], onDelete: Cascade)
+
+  @@index([order_id])
+  @@index([status])
+}
+
+model TaxInvoice {
+  id                   String        @id @default(uuid())
+  invoice_number       String        @unique
+  order_id             String
+  order_item_id        String        @unique
+  seller_id            String
+  user_id              String
+  seller_gstin         String
+  seller_state         String
+  billing_state        String
+  hsn_code             String
+  taxable_amount       Float
+  gst_rate_percent     Float
+  cgst_amount          Float         @default(0.0)
+  sgst_amount          Float         @default(0.0)
+  igst_amount          Float         @default(0.0)
+  total_invoice_amount Float
+  amount_in_words      String
+  invoice_date         DateTime      @default(now())
+
+  order                Order         @relation(fields: [order_id], references: [id], onDelete: Cascade)
+  order_item           OrderItem     @relation(fields: [order_item_id], references: [id], onDelete: Cascade)
+  seller               SellerProfile @relation(fields: [seller_id], references: [id], onDelete: Restrict)
+  user                 User          @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([seller_id, invoice_date])
+  @@index([user_id])
+  @@index([invoice_number])
+}
+
+// -------------------------------------------------------------
+// 7. Real-Time Support & Notification Logs
+// -------------------------------------------------------------
+
+model SupportTicket {
+  id              String          @id @default(uuid())
+  ticket_number   String          @unique
+  user_id         String
+  order_item_id   String?
+  seller_id       String?
+  category        String
+  subject         String
+  priority        TicketPriority  @default(MEDIUM)
+  status          TicketStatus    @default(OPEN)
+  last_message_at DateTime        @default(now())
+  created_at      DateTime        @default(now())
+
+  user            User            @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  messages        TicketMessage[]
+
+  @@index([user_id, status])
+  @@index([seller_id, status])
+  @@index([ticket_number])
+}
+
+model TicketMessage {
+  id             String        @id @default(uuid())
+  ticket_id      String
+  sender_id      String
+  sender_role    String
+  message_text   String
+  attachment_url String?
+  is_read        Boolean       @default(false)
+  created_at     DateTime      @default(now())
+
+  ticket         SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+
+  @@index([ticket_id, created_at])
+}
+
+model NotificationLog {
+  id            String              @id @default(uuid())
+  user_id       String
+  order_id      String?
+  channel       NotificationChannel @default(EMAIL)
+  event_type    String
+  status        String
+  error_message String?
+  created_at    DateTime            @default(now())
+
+  @@index([user_id, created_at])
+}
