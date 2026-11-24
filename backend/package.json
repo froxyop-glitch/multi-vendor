@@ -4,11 +4,11 @@
   "description": "Multi-Vendor E-Commerce REST API & Socket.IO Server with Prisma ORM",
   "main": "dist/server.js",
   "scripts": {
-    "build": "prisma generate && tsc",
-    "postinstall": "prisma generate",
+    "build": "node scripts/generate-prisma.js && tsc",
+    "postinstall": "node scripts/generate-prisma.js",
     "start": "node dist/server.js",
     "dev": "tsx watch src/server.ts",
-    "prisma:generate": "prisma generate",
+    "prisma:generate": "node scripts/generate-prisma.js",
     "prisma:migrate": "prisma migrate dev",
     "prisma:push": "prisma db push",
     "prisma:seed": "tsx prisma/seed.ts"
