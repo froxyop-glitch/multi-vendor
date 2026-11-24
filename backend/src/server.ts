@@ -59,7 +59,25 @@ app.use(morgan('dev'));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// Health Check
+// Root & Health Check
+app.get('/', (_req: Request, res: Response) => {
+  res.json({
+    status: 'healthy',
+    service: 'ShopEzy Multi-Vendor E-Commerce REST & WebSocket API',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      store: '/api/v1/store',
+      products: '/api/v1/products',
+      discovery: '/api/v1/discovery',
+      cart: '/api/v1/cart',
+      auth: '/api/v1/auth',
+      admin: '/api/v1/admin',
+      seller: '/api/v1/seller'
+    }
+  });
+});
+
 app.get('/health', (_req: Request, res: Response) => {
   res.json({
     status: 'healthy',
@@ -94,11 +112,12 @@ app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
   res.status(500).json({ success: false, message: err.message || 'Internal Server Error' });
 });
 
-if (process.env.NODE_ENV !== 'test') {
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
   server.listen(PORT, () => {
     console.log(`🚀 Server running in ${process.env.NODE_ENV || 'development'} on http://localhost:${PORT}`);
     console.log(`📡 Socket.IO server initialized on ws://localhost:${PORT}`);
   });
 }
 
+export default app;
 export { app, server };

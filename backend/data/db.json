@@ -361,12 +361,12 @@
       "handling_days": 1,
       "approval_status": "APPROVED",
       "commission_rate": 8,
-      "pending_clearance_balance": 14147.08,
+      "pending_clearance_balance": 15526.16,
       "available_balance": 45200,
       "on_hold_payout_balance": 0,
       "total_withdrawn": 150000,
       "created_at": "2026-01-15T00:00:00.000Z",
-      "updated_at": "2026-11-22T05:33:43.041Z"
+      "updated_at": "2026-11-23T18:17:52.668Z"
     },
     {
       "id": "sel_urbanstyle",
@@ -479,6 +479,16 @@
       "amount": 1747.08,
       "balance_after": 45200,
       "description": "Pending Clearance for Order #9244ed22-8e1d-47e0-b125-4cfca55a8a58 - AeroBuds Pro True Wireless Earbuds with Spatial Audio"
+    },
+    {
+      "id": "2336f92f-f662-4dae-a83a-58ccc6878f81",
+      "created_at": "2026-11-23T18:17:52.670Z",
+      "seller_id": "sel_techworld",
+      "order_item_id": null,
+      "type": "CREDIT_ORDER_EARNING",
+      "amount": 1379.08,
+      "balance_after": 45200,
+      "description": "Pending Clearance for Order #5dff3e97-a209-4b99-83a9-8dd1a2a64995 - ChargeFast 65W GaN V Ultra-Compact Multi-Port Wall Charger"
     }
   ],
   "payoutRequests": [
@@ -749,7 +759,7 @@
       "description": "Gallium Nitride 5th Gen technology charges your laptop, tablet, and phone simultaneously with dual USB-C PD 3.0 and USB-A QC 4.0 ports in a pocket-sized plug.",
       "price": 2499,
       "discount_price": 1499,
-      "stock_quantity": 150,
+      "stock_quantity": 149,
       "images": [
         "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?w=800&auto=format&fit=crop&q=80"
       ],
@@ -766,7 +776,8 @@
       "is_active": true,
       "rating": 4.6,
       "review_count": 110,
-      "created_at": "2026-01-28T00:00:00.000Z"
+      "created_at": "2026-01-28T00:00:00.000Z",
+      "updated_at": "2026-11-23T18:17:52.668Z"
     },
     {
       "id": "prod_denim_jeans",
@@ -1307,6 +1318,28 @@
         "state": "West Bengal",
         "pincode": "736123"
       }
+    },
+    {
+      "id": "5dff3e97-a209-4b99-83a9-8dd1a2a64995",
+      "created_at": "2026-11-23T18:17:52.666Z",
+      "user_id": "usr_manager",
+      "total_amount": 1499,
+      "shipping_fee": 0,
+      "coupon_code": null,
+      "coupon_discount_amount": 0,
+      "payment_method": "RAZORPAY",
+      "payment_status": "PAID",
+      "razorpay_order_id": "order_40785600aebd44ce",
+      "razorpay_payment_id": "pay_sim_1795457872662",
+      "razorpay_signature": "mock_sig_valid",
+      "shipping_address": {
+        "fullName": "Operations Manager",
+        "phone": "+91 9876543211",
+        "street": "ShopEzy Hub, Bengaluru, KA 560001",
+        "city": "Alipurduar",
+        "state": "West Bengal",
+        "pincode": "736123"
+      }
     }
   ],
   "orderItems": [
@@ -1410,6 +1443,24 @@
       "awb_tracking_number": "EXP-736123-926099",
       "tracking_url": "https://track.shopezy.com",
       "estimated_delivery_date": "2026-11-25T05:33:43.044Z"
+    },
+    {
+      "id": "2db9e006-491d-473f-89d4-a34cbc89f21a",
+      "created_at": "2026-11-23T18:17:52.672Z",
+      "order_id": "5dff3e97-a209-4b99-83a9-8dd1a2a64995",
+      "product_id": "prod_gan_charger",
+      "variant_id": null,
+      "variant_snapshot": {},
+      "seller_id": "sel_techworld",
+      "quantity": 1,
+      "price_at_purchase": 1499,
+      "platform_commission_amount": 119.92,
+      "seller_net_earning": 1379.08,
+      "item_status": "PROCESSING",
+      "courier_name": "BlueDart Surface Express",
+      "awb_tracking_number": "EXP-736123-695053",
+      "tracking_url": "https://track.shopezy.com",
+      "estimated_delivery_date": "2026-11-26T18:17:52.671Z"
     }
   ],
   "shipmentTrackingEvents": [
@@ -1470,6 +1521,15 @@
       "location": "12 M.G. Road, Buxa Feeder Rd, Alipurduar, WB 736123",
       "remarks": "Order received. Seller has begun packaging your items.",
       "event_time": "2026-11-22T05:33:43.045Z"
+    },
+    {
+      "id": "b5ba80d7-9e4c-43e3-8908-b341e838ef45",
+      "created_at": "2026-11-23T18:17:52.673Z",
+      "order_item_id": "2db9e006-491d-473f-89d4-a34cbc89f21a",
+      "status_title": "Order Confirmed",
+      "location": "12 M.G. Road, Buxa Feeder Rd, Alipurduar, WB 736123",
+      "remarks": "Order received. Seller has begun packaging your items.",
+      "event_time": "2026-11-23T18:17:52.673Z"
     }
   ],
   "taxInvoices": [
@@ -1554,6 +1614,27 @@
       "total_invoice_amount": 1899,
       "amount_in_words": "Rupees One Thousand Eight Hundred Ninety Nine Only",
       "invoice_date": "2026-11-22T05:33:43.047Z"
+    },
+    {
+      "id": "f98ad84a-e68f-49e4-9409-2006120254ce",
+      "created_at": "2026-11-23T18:17:52.675Z",
+      "invoice_number": "INV/2026-27/00005",
+      "order_id": "5dff3e97-a209-4b99-83a9-8dd1a2a64995",
+      "order_item_id": "2db9e006-491d-473f-89d4-a34cbc89f21a",
+      "seller_id": "sel_techworld",
+      "user_id": "usr_manager",
+      "seller_gstin": "19ABCDE1234F1Z5",
+      "seller_state": "West Bengal",
+      "billing_state": "West Bengal",
+      "hsn_code": "8504",
+      "taxable_amount": 1270.34,
+      "gst_rate_percent": 18,
+      "cgst_amount": 114.33,
+      "sgst_amount": 114.33,
+      "igst_amount": 0,
+      "total_invoice_amount": 1499,
+      "amount_in_words": "Rupees One Thousand Four Hundred Ninety Nine Only",
+      "invoice_date": "2026-11-23T18:17:52.675Z"
     }
   ],
   "productReviews": [
@@ -1734,6 +1815,24 @@
       "user_id": "usr_customer_1",
       "product_id": "prod_smartwatch_ultra",
       "created_at": "2026-02-15T09:00:00.000Z"
+    },
+    {
+      "id": "31e28b91-0324-43d8-9e7d-73044d0185cf",
+      "created_at": "2026-11-23T18:17:08.965Z",
+      "user_id": "usr_manager",
+      "product_id": "prod_athletic_joggers"
+    },
+    {
+      "id": "43c0c1ce-727b-4d2e-b46a-4f996cd855f2",
+      "created_at": "2026-11-23T18:17:10.271Z",
+      "user_id": "usr_manager",
+      "product_id": "prod_canvas_sneakers"
+    },
+    {
+      "id": "52432c1b-a5bf-4edb-b5d2-65afee1e31ed",
+      "created_at": "2026-11-23T18:17:12.048Z",
+      "user_id": "usr_manager",
+      "product_id": "prod_linen_shirt"
     }
   ],
   "recentlyViewed": [
@@ -1756,6 +1855,14 @@
       "product_id": "prod_earbuds_tws",
       "viewed_at": "2026-11-22T05:33:38.824Z",
       "updated_at": "2026-11-22T05:33:38.824Z"
+    },
+    {
+      "id": "53560cc3-fd56-4312-b3a2-e0884ee495f8",
+      "created_at": "2026-11-23T18:17:33.775Z",
+      "user_id": "usr_manager",
+      "product_id": "prod_gan_charger",
+      "viewed_at": "2026-11-23T18:17:33.841Z",
+      "updated_at": "2026-11-23T18:17:33.841Z"
     }
   ],
   "cart": [
@@ -1773,6 +1880,21 @@
       "id": "bdcd7e9c-dea4-43fb-b83a-fa5760795283",
       "created_at": "2026-11-22T05:35:19.823Z",
       "user_id": "usr_manager"
+    },
+    {
+      "id": "c5850cba-fa6a-433e-a7e4-62f04cdbbae5",
+      "created_at": "2026-11-24T18:52:38.912Z",
+      "user_id": "usr_finance"
+    },
+    {
+      "id": "fb2098c3-f705-4ae5-b86c-1dd3dd47b3c2",
+      "created_at": "2026-11-24T18:53:22.715Z",
+      "user_id": "usr_seller_2"
+    },
+    {
+      "id": "af485d7c-62ab-48e5-802f-254b6ddaf94c",
+      "created_at": "2026-11-24T18:55:07.995Z",
+      "user_id": "usr_seller_1"
     }
   ],
   "cartItems": [],
@@ -1815,6 +1937,16 @@
       "created_at": "2026-11-22T05:33:43.050Z",
       "user_id": "usr_customer_1",
       "order_id": "9244ed22-8e1d-47e0-b125-4cfca55a8a58",
+      "channel": "EMAIL",
+      "event_type": "ORDER_CONFIRMATION",
+      "status": "SENT",
+      "error_message": null
+    },
+    {
+      "id": "6705c78b-54e3-44ca-b882-79440dccbfa7",
+      "created_at": "2026-11-23T18:17:52.678Z",
+      "user_id": "usr_manager",
+      "order_id": "5dff3e97-a209-4b99-83a9-8dd1a2a64995",
       "channel": "EMAIL",
       "event_type": "ORDER_CONFIRMATION",
       "status": "SENT",
